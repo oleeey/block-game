@@ -70,7 +70,6 @@ def onKeyPress(e):
         player.direction = "up"
     elif key == "Down":
        player.direction = "down"
-    print(player.direction)
     
 player = Shape(40, 0.5, 0.5)
 
@@ -93,7 +92,7 @@ while True:
         player.moveDown()
         time.sleep(sec)
         
-
+    #print([round(player.x, 2), round(player.y, 2)])
     
     win.update_idletasks()
     win.update()
