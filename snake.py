@@ -9,6 +9,9 @@ win.geometry("500x500")
 canvas = tk.Canvas(win, width="500", height="500", background="black")
 canvas.pack(fill="both", expand=True)
 
+global score
+score = 0
+
 class Shape():
     def __init__(self, l, x, y, c):
         self.x = x
@@ -22,7 +25,9 @@ class Shape():
         self.deltax = (self.length / 2) / 500
         self.deltay = (self.length / 2) / 500
         self.p1 = [round(self.x - self.deltax, 2), round(self.y - self.deltay, 2)] # Oben links
-        self.p2 = [round(self.x + self.deltax, 2), round(self.y + self.deltay, 2)] # Unten rechts
+        self.p2 = [round(self.x + self.deltax, 2), round(self.y - self.deltay, 2)] # Oben rechts
+        self.p3 = [round(self.x + self.deltax, 2), round(self.y + self.deltay, 2)] # Unten rechts
+        self.p4 = [round(self.x - self.deltax, 2), round(self.y + self.deltay, 2)] # Unten links
 
     def create(self):
         self.canvas = tk.Canvas(canvas, width=self.length, height=self.length, background=self.color)
@@ -32,11 +37,15 @@ class Shape():
         self.x += num
         self.p1[0] += num
         self.p2[0] += num
+        self.p3[0] += num
+        self.p4[0] += num
 
     def changeY(self, num):
         self.y += num
         self.p1[1] += num
         self.p2[1] += num
+        self.p3[1] += num
+        self.p4[1] += num
 
     def moveLeft(self):
         if self.p1[0] < self.deltax:
@@ -47,7 +56,7 @@ class Shape():
             self.changeX(-self.speed)
             
     def moveRight(self):
-        if self.p2[0] > 1 - self.deltax:
+        if self.p3[0] > 1 - self.deltax:
             self.game_over = True
             print("game over")
         else:
@@ -63,7 +72,7 @@ class Shape():
             self.changeY(-self.speed)
 
     def moveDown(self):
-        if self.p2[1] > 1 - self.deltay:
+        if self.p3[1] > 1 - self.deltay:
             self.game_over = True
             print("game over")
         else:
@@ -71,7 +80,11 @@ class Shape():
             self.changeY(self.speed)
 
     def __repr__(self):
-        return repr(self.p1), repr(self.p2)
+        return repr(self.p1), repr(self.p3)
+    
+    def respawn(self):
+        self.canvas.place(relx=-100, rely=-100)
+        apple.__init__(40, (random.randrange(5, 95)) / 100, (random.randrange(5, 95)) / 100, "red")
 
 def onKeyPress(e):
     key = e.keysym
@@ -92,10 +105,13 @@ player = Shape(40, 0.5, 0.5, "white")
 
 apple = Shape(40, (random.randrange(5, 95)) / 100, (random.randrange(5, 95)) / 100, "red")
 
+scoreL = tk.Label(canvas, text="Score: 0", background="white")
+scoreL.pack()
+
 win.bind("<KeyPress>", onKeyPress)
 
 while not player.game_over:
-    sec = 0.05
+    sec = 0.5
     if player.direction == "left":
         time.sleep(sec)
         player.moveLeft()
@@ -109,14 +125,35 @@ while not player.game_over:
         player.moveDown()
         time.sleep(sec)
 
-    if player.p1[0] <= apple.p2[0] and player.p1[0] >= apple.p1[0] and player.p1[1] <= apple.p2[1] and player.p1[1] >= apple.p1[1]:
-        apple.canvas.place(relx=-100, rely=-100)
-        del apple
-        apple = Shape(40, (random.randrange(5, 95)) / 100, (random.randrange(5, 95)) / 100, "red")
+    if (player.p1[0] <= apple.p3[0] and player.p1[0] >= apple.p1[0] and  
+        player.p1[1] <= apple.p3[1] and player.p1[1] >= apple.p1[1]):
+
+        player2 = Shape(40, 0.5, 0.5, "white")
+        apple.respawn()
+        score += 1
         
+    if (player.p2[0] >= apple.p4[0] and player.p2[0] <= apple.p2[0] and
+        player.p2[1] <= apple.p4[1] and player.p2[1] >= apple.p2[1]):
+
+        apple.respawn()
+        score += 1
+
+    if (player.p3[0] >= apple.p1[0] and player.p3[0] <= apple.p3[0] and
+        player.p3[1] <= apple.p3[1] and player.p3[1] >= apple.p1[1]):
+
+        apple.respawn()
+        score += 1
+
+    if (player.p4[0] <=  apple.p2[0] and player.p4[0] >= apple.p4[0] and
+        player.p4[1] >= apple.p2[1] and player.p4[1] <= apple.p4[1]):
+
+        apple.respawn()
+        score += 1
+
     #print([round(player.x, 2), round(player.y, 2)])  
     #print(player.p2)
-    
+        
+    scoreL.configure(text="Score: " + str(score))
     win.update_idletasks()
     win.update()
 
