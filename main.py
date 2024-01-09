@@ -6,7 +6,7 @@ score = 0
 winL = 500
 
 win = tk.Tk()
-win.title("Snake Game")
+win.title("Block Game")
 win.geometry(str(winL) + "x" + str(winL))
 
 canvas = tk.Canvas(win, width="500", height="500", background="black")
